@@ -12,12 +12,19 @@ import time
 import os
 import pickle
 
-import Energy
+from Energy import Energy
 
 register_matplotlib_converters()
 plt.style.use('default')
 
-st.set_page_config(layout="wide")
+st.set_page_config(layout='centered')
 
 st.title('Energy forecast app')
 
+energy = Energy()
+
+df = energy.get_data()
+
+df['USE_FACT'].plot(figsize=(10, 5), label='past')
+
+st.pyplot(plt)

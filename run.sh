@@ -1,0 +1,1 @@
+streamlit run energy_app.py

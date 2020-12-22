@@ -12,8 +12,8 @@ class Energy:
         
         with open(filename, 'rb') as handle:
             self.data = pickle.load(handle)
-            self.df = data['data']
-            self.model = data['model']
+            self.df = self.data['data']
+            self.model = self.data['model']
 
     def get_data(self, date='1979-01-01'):
         """
