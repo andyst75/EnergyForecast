@@ -34,7 +34,6 @@ st.sidebar.header('User Input Features')
 
 col1 = st.sidebar
 col1.header('Input Options')
-predict_period = col1.slider('Predict period', value=7, min_value=1, max_value=7)
 
 random_date = col1.checkbox('Random date', value=False)
 
@@ -52,6 +51,7 @@ col1.button('Update')
 def load_data():
     return Energy()
 
+
 data_df = load_data()
 
 df_with_consumption = data_df.get_data_with_consumption(str(predict_from))
@@ -68,3 +68,6 @@ with st.beta_expander("See explanation"):
             be random.
          """)
     st.image("https://static.streamlit.io/examples/dice.jpg")
+
+df_consumption = df_with_consumption[['consumption']].reset_index()
+st.dataframe(df_consumption[['consumption']].describe(), 500, 500)
