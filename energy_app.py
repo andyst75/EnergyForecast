@@ -6,6 +6,7 @@ import streamlit as st
 from pandas.plotting import register_matplotlib_converters
 
 from energy import Energy
+import plotly.express as px
 
 register_matplotlib_converters()
 plt.style.use('default')
@@ -28,7 +29,7 @@ PRED_HORIZON = 7
 WIN_LEN = 30
 TODAY = datetime.datetime.now().date()
 MIN_DATE = TODAY - datetime.timedelta(days=DAYS_BACK) + datetime.timedelta(days=WIN_LEN)
-MAX_DATE = datetime.datetime(2020, 10, 10).date()
+MAX_DATE = datetime.datetime(2020, 1, 10).date()
 
 st.sidebar.header('User Input Features')
 
@@ -56,10 +57,37 @@ data_df = load_data()
 
 df_with_consumption = data_df.get_data_with_consumption(str(predict_from))
 
-ax = df_with_consumption['consumption'].plot(figsize=(10, 5), label='predict')
-ax.set(ylabel=f'consumption', xlabel='', title=f'Prediction of the consumption')
-plt.legend()
-st.pyplot(plt)
+#ax = df_with_consumption['consumption'].plot(figsize=(10, 5), label='predict')
+#ax.set(ylabel=f'consumption', xlabel='', title=f'Prediction of the consumption')
+#plt.legend()
+#st.pyplot(plt)
+
+fig = px.line(df_with_consumption['consumption'], labels={'DATE':'Период', 'value':'Среднечасовое потребление, МВт'})
+
+fig.update_layout( 
+    xaxis=dict( 
+        rangeselector=dict( 
+            buttons=list([ 
+                dict(count=14, 
+                     step="day", 
+                     stepmode="backward"), 
+                dict(count=30, 
+                     step="day", 
+                     stepmode="backward"), 
+                dict(count=6, 
+                     step="month", 
+                     stepmode="backward"), 
+            ]) 
+        ), 
+        rangeslider=dict( 
+            visible=True
+        ), 
+    ) 
+) 
+fig.update_layout(showlegend=False,)
+
+st.plotly_chart(fig, use_container_width=True)
+
 
 with st.beta_expander("See explanation"):
     st.write("""

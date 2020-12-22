@@ -2,6 +2,7 @@ scikit-learn
 pandas
 requests
 streamlit
+plotly
 matplotlib
 seaborn
 numpy==1.18.5
