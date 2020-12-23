@@ -71,12 +71,12 @@ isolation_index_delta = st.sidebar.slider(
 st.sidebar.button('Update')
 
 
-# @st.cache
-def load_data():
+@st.cache
+def load_energy_data():
     return Energy()
 
 
-data_df = load_data()
+data_df = load_energy_data()
 
 df_with_consumption = data_df.get_data_with_consumption(str(predict_from),
                                                         predict_days=pred_horizon,
