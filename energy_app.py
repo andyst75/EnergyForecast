@@ -26,11 +26,10 @@ st.markdown("""
 * **Python libraries:** base64, pandas, streamlit, numpy, matplotlib, seaborn, BeautifulSoup, requests, json, time
 * **Data source:** [Minenergo](https://minenergo.gov.ru/).
 """)
-DAYS_BACK = 200
-WIN_LEN = 30
+DAYS_BACK = 1000
 TODAY = datetime.datetime.now().date()
-MIN_DATE = TODAY - datetime.timedelta(days=DAYS_BACK) + datetime.timedelta(days=WIN_LEN)
-MAX_DATE = datetime.datetime(2019, 7, 1).date()
+MIN_DATE = TODAY - datetime.timedelta(days=DAYS_BACK)
+MAX_DATE = datetime.datetime(2020, 7, 1).date()
 
 col1 = st.sidebar
 st.sidebar.image(image=Image.open(f'{Path().absolute()}/resources/made.png'), width=200)
@@ -42,10 +41,10 @@ if random_date:
     delta = int((MAX_DATE - MIN_DATE).days * np.random.random())
     predict_from = MIN_DATE + datetime.timedelta(days=delta)
 else:
-    predict_from = MAX_DATE
+    predict_from = MIN_DATE
 predict_from = st.sidebar.date_input(
     label='Predict from',
-    value=predict_from,
+    value=MIN_DATE,
     min_value=MIN_DATE,
     max_value=MAX_DATE)
 pred_horizon = st.sidebar.slider(
