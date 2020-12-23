@@ -17,25 +17,22 @@ st.set_page_config(layout='centered')
 st.title('Energy forecast app')
 
 st.markdown('''
-Система краткосрочного прогноза потребление электроэнергии ***ОЭС Средней Волги***, с возможностью моделирования потребления 
-электроэнергии в зависимости от изменения внешних факторов.
+Short-term forecast system for electricity consumption ***OES of the Middle Volga***, with the possibility of modeling
+electricity consumption depending on changes in external factors.
 ''')
 
 st.markdown("""
 * **Python libraries:** base64, pandas, streamlit, numpy, matplotlib, seaborn, BeautifulSoup, requests, json, time
-* **Data source:** [Minenergo](http://https://minenergo.gov.ru/).
+* **Data source:** [Minenergo](https://minenergo.gov.ru/).
 """)
 DAYS_BACK = 200
-PRED_HORIZON = 3
 WIN_LEN = 30
 TODAY = datetime.datetime.now().date()
 MIN_DATE = TODAY - datetime.timedelta(days=DAYS_BACK) + datetime.timedelta(days=WIN_LEN)
 MAX_DATE = datetime.datetime(2019, 7, 1).date()
 
-st.sidebar.header('User Input Features')
-
 col1 = st.sidebar
-col1.header('Input Options')
+col1.header('Options')
 
 random_date = col1.checkbox('Random date', value=False)
 
@@ -73,7 +70,7 @@ isolation_index_delta = col1.slider(
 col1.button('Update')
 
 
-# @st.cache
+@st.cache
 def load_data():
     return Energy()
 
@@ -117,22 +114,20 @@ fig.update_layout(
     )
 )
 
-fig.update_layout(showlegend=False, )
+fig.update_layout(showlegend=False)
 
 fig.update_layout(
     autosize=False,
     width=800,
-    height=600, )
+    height=600
+)
 
 st.plotly_chart(fig, use_container_width=True)
 
-with st.beta_expander("See explanation"):
-    st.write("""
-           The chart above shows some numbers I picked for you.
-            I rolled actual dice for these, so they're *guaranteed* to
-            be random.
-         """)
-    st.image("https://static.streamlit.io/examples/dice.jpg")
-
+st.header("Statistic")
 df_consumption = df_with_consumption[['consumption']].reset_index()
-st.dataframe(df_consumption[['consumption']].describe(), 500, 500)
+st.dataframe(df_consumption[['consumption']].describe().T)
+
+st.header("Data")
+df_consumption = df_with_consumption.reset_index()
+st.dataframe(df_consumption.head(10))
