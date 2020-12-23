@@ -5,6 +5,7 @@ import numpy as np
 import pandas as pd
 import plotly.express as px
 import streamlit as st
+from PIL import Image
 from pandas.plotting import register_matplotlib_converters
 
 from energy import Energy
@@ -12,8 +13,7 @@ from energy import Energy
 register_matplotlib_converters()
 plt.style.use('default')
 
-st.set_page_config(layout='centered')
-
+st.set_page_config(layout='wide', page_title='Energy forecast app')
 st.title('Energy forecast app')
 
 st.markdown('''
@@ -32,42 +32,43 @@ MIN_DATE = TODAY - datetime.timedelta(days=DAYS_BACK) + datetime.timedelta(days=
 MAX_DATE = datetime.datetime(2019, 7, 1).date()
 
 col1 = st.sidebar
-col1.header('Options')
+st.sidebar.image(image=Image.open('resources/made.png'), width=200)
+st.sidebar.header('Options')
 
-random_date = col1.checkbox('Random date', value=False)
+random_date = st.sidebar.checkbox('Random date', value=False)
 
 if random_date:
     delta = int((MAX_DATE - MIN_DATE).days * np.random.random())
     predict_from = MIN_DATE + datetime.timedelta(days=delta)
 else:
     predict_from = MAX_DATE
-predict_from = col1.date_input(
+predict_from = st.sidebar.date_input(
     label='Predict from',
     value=predict_from,
     min_value=MIN_DATE,
     max_value=MAX_DATE)
-pred_horizon = col1.slider(
+pred_horizon = st.sidebar.slider(
     label="Predict period (days)",
     value=2,
     min_value=1,
     max_value=4)
-temperature_delta = col1.slider(
+temperature_delta = st.sidebar.slider(
     label="Choose variation of temperature",
     value=0,
     min_value=-10,
     max_value=10)
-consumption_index_delta = col1.slider(
+consumption_index_delta = st.sidebar.slider(
     label="Choose variation of consumer activity index",
     value=0,
     min_value=-20,
     max_value=20)
-isolation_index_delta = col1.slider(
+isolation_index_delta = st.sidebar.slider(
     label="Choose variation of isolation index",
     value=0,
     min_value=-1,
     max_value=1)
 
-col1.button('Update')
+st.sidebar.button('Update')
 
 
 # @st.cache
