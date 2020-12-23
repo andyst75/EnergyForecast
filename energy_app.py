@@ -1,4 +1,5 @@
 import datetime
+from pathlib import Path
 
 import matplotlib.pyplot as plt
 import numpy as np
@@ -32,7 +33,7 @@ MIN_DATE = TODAY - datetime.timedelta(days=DAYS_BACK) + datetime.timedelta(days=
 MAX_DATE = datetime.datetime(2019, 7, 1).date()
 
 col1 = st.sidebar
-st.sidebar.image(image=Image.open('resources/made.png'), width=200)
+st.sidebar.image(image=Image.open(f'{Path().absolute()}/resources/made.png'), width=200)
 st.sidebar.header('Options')
 
 random_date = st.sidebar.checkbox('Random date', value=False)
