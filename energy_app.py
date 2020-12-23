@@ -17,11 +17,11 @@ st.set_page_config(layout='centered')
 st.title('Energy forecast app')
 
 st.markdown('''
-This app retrieves cryptocurrency prices for the top 100 cryptocurrency from the **CoinMarketCap**!
+Система краткосрочного прогноза потребление электроэнергии ***ОЭС Средней Волги***, с возможностью моделирования потребления 
+электроэнергии в зависимости от изменения внешних факторов.
 ''')
 
-expander_bar = st.beta_expander("About")
-expander_bar.markdown("""
+st.markdown("""
 * **Python libraries:** base64, pandas, streamlit, numpy, matplotlib, seaborn, BeautifulSoup, requests, json, time
 * **Data source:** [Minenergo](http://https://minenergo.gov.ru/).
 """)
@@ -73,7 +73,7 @@ isolation_index_delta = col1.slider(
 col1.button('Update')
 
 
-@st.cache
+# @st.cache
 def load_data():
     return Energy()
 
@@ -86,8 +86,11 @@ df_with_consumption = data_df.get_data_with_consumption(str(predict_from),
                                                         consumption_index_delta=consumption_index_delta,
                                                         isolation_index_delta=isolation_index_delta)
 
-fact_df = df_with_consumption[['fact']]
-consumption_df = df_with_consumption[['consumption']].shift(pred_horizon)
+shift_index_data = pd.date_range(df_with_consumption[['consumption']].index[-1] + pd.DateOffset(1),
+                                 periods=pred_horizon, freq='D')
+df_with_consumption_with_shift = df_with_consumption.append(pd.DataFrame(index=shift_index_data))
+fact_df = df_with_consumption_with_shift[['fact']]
+consumption_df = df_with_consumption_with_shift[['consumption']].shift(pred_horizon)
 data_plot = pd.concat([fact_df, consumption_df], axis=1)
 
 fig = px.line(data_plot,
