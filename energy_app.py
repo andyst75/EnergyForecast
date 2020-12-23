@@ -2,11 +2,12 @@ import datetime
 
 import matplotlib.pyplot as plt
 import numpy as np
+import pandas as pd
+import plotly.express as px
 import streamlit as st
 from pandas.plotting import register_matplotlib_converters
 
 from energy import Energy
-import plotly.express as px
 
 register_matplotlib_converters()
 plt.style.use('default')
@@ -43,7 +44,31 @@ if random_date:
     predict_from = MIN_DATE + datetime.timedelta(days=delta)
 else:
     predict_from = MAX_DATE
-predict_from = col1.date_input('Predict from', value=predict_from, min_value=MIN_DATE, max_value=MAX_DATE)
+predict_from = col1.date_input(
+    label='Predict from',
+    value=predict_from,
+    min_value=MIN_DATE,
+    max_value=MAX_DATE)
+pred_horizon = col1.slider(
+    label="Predict period (days)",
+    value=2,
+    min_value=1,
+    max_value=5)
+temperature_delta = col1.slider(
+    label="Choose variation of temperature",
+    value=0,
+    min_value=-10,
+    max_value=10)
+consumption_index_delta = col1.slider(
+    label="Choose variation of consumer activity index",
+    value=0,
+    min_value=-20,
+    max_value=20)
+isolation_index_delta = col1.slider(
+    label="Choose variation of isolation index",
+    value=0,
+    min_value=-1,
+    max_value=1)
 
 col1.button('Update')
 
@@ -55,9 +80,17 @@ def load_data():
 
 data_df = load_data()
 
-df_with_consumption = data_df.get_data_with_consumption(str(predict_from), predict_days=PRED_HORIZON - 1)
+df_with_consumption = data_df.get_data_with_consumption(str(predict_from),
+                                                        predict_days=pred_horizon,
+                                                        temperature_delta=temperature_delta,
+                                                        consumption_index_delta=consumption_index_delta,
+                                                        isolation_index_delta=isolation_index_delta)
 
-fig = px.line(df_with_consumption[['fact', 'consumption']],
+fact_df = df_with_consumption[['fact']]
+consumption_df = df_with_consumption[['consumption']].shift(pred_horizon)
+data_plot = pd.concat([fact_df, consumption_df], axis=1)
+
+fig = px.line(data_plot,
               labels={'DATE': 'Период', 'value': 'Среднечасовое потребление, МВт'})
 
 fig.update_layout(

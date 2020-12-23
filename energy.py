@@ -24,12 +24,20 @@ class Energy:
 
         return np.expm1(self.df[self.df.DATE >= date][['fact']])
 
-    def get_data_with_consumption(self, date, predict_days=2):
+    def get_data_with_consumption(self, date,
+                                  predict_days=2,
+                                  temperature_delta=0,
+                                  consumption_index_delta=0,
+                                  isolation_index_delta=0
+                                  ):
         """
         Датафрейм, содержащий прогнозы, начиная с указанной даты, на последующие 5 дней
         """
         drop_columns = ['DATE', 'USE_PRED1', 'USE_PRED2', 'USE_PRED3', 'USE_PRED4', 'USE_PRED5']
         filtered_data = self.df[self.df.DATE >= date].drop(columns=drop_columns)
-        filtered_data['consumption'] = np.expm1(self.data['model'] \
-            .predict(filtered_data.drop(columns=['fact']))[:, predict_days])
+        filtered_data['TEMP'] = filtered_data['TEMP'] + temperature_delta
+        filtered_data['COMS'] = filtered_data['COMS'] + consumption_index_delta
+        filtered_data['II3'] = filtered_data['II3'] + isolation_index_delta
+        filtered_data['consumption'] = np.expm1(
+            self.data['model'].predict(filtered_data.drop(columns=['fact']))[:, predict_days])
         return filtered_data
