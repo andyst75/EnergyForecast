@@ -3,6 +3,7 @@ pandas
 requests
 streamlit
 plotly
+seaborn
 matplotlib
 seaborn
 numpy==1.18.5

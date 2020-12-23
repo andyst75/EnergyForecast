@@ -25,11 +25,11 @@ expander_bar.markdown("""
 * **Data source:** [Minenergo](http://https://minenergo.gov.ru/).
 """)
 DAYS_BACK = 200
-PRED_HORIZON = 7
+PRED_HORIZON = 3
 WIN_LEN = 30
 TODAY = datetime.datetime.now().date()
 MIN_DATE = TODAY - datetime.timedelta(days=DAYS_BACK) + datetime.timedelta(days=WIN_LEN)
-MAX_DATE = datetime.datetime(2020, 1, 10).date()
+MAX_DATE = datetime.datetime(2019, 7, 1).date()
 
 st.sidebar.header('User Input Features')
 
@@ -55,14 +55,14 @@ def load_data():
 
 data_df = load_data()
 
-df_with_consumption = data_df.get_data_with_consumption(str(predict_from))
+df_with_consumption = data_df.get_data_with_consumption(str(predict_from), predict_days=PRED_HORIZON - 1)
 
 #ax = df_with_consumption['consumption'].plot(figsize=(10, 5), label='predict')
 #ax.set(ylabel=f'consumption', xlabel='', title=f'Prediction of the consumption')
 #plt.legend()
 #st.pyplot(plt)
 
-fig = px.line(df_with_consumption['consumption'], labels={'DATE':'Период', 'value':'Среднечасовое потребление, МВт'})
+fig = px.line(df_with_consumption[['fact', 'consumption' ]], labels={'DATE':'Период', 'value':'Среднечасовое потребление, МВт'})
 
 fig.update_layout( 
     xaxis=dict( 
@@ -84,7 +84,13 @@ fig.update_layout(
         ), 
     ) 
 ) 
+
 fig.update_layout(showlegend=False,)
+
+fig.update_layout(
+    autosize=False,
+    width=800,
+    height=600,)
 
 st.plotly_chart(fig, use_container_width=True)
 

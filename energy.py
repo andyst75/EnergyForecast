@@ -14,6 +14,7 @@ class Energy:
         with open(filename, 'rb') as handle:
             self.data = pickle.load(handle)
             self.df = self.data['data']
+            self.df['fact'] = np.expm1(self.df['USE_FACT'])
             self.model = self.data['model']
 
     def get_data(self, date='1979-01-01'):
@@ -21,13 +22,14 @@ class Energy:
         Датафрейм, начиная с указанной даты
         """
 
-        return np.expm1(self.df[self.df.DATE >= date][["USE_FACT"]])
+        return np.expm1(self.df[self.df.DATE >= date][['fact']])
 
-    def get_data_with_consumption(self, date):
+    def get_data_with_consumption(self, date, predict_days=2):
         """
         Датафрейм, содержащий прогнозы, начиная с указанной даты, на последующие 5 дней
         """
-        drop_columns = ["DATE", "USE_PRED1", "USE_PRED2", "USE_PRED3", "USE_PRED4", "USE_PRED5"]
+        drop_columns = ['DATE', 'USE_PRED1', 'USE_PRED2', 'USE_PRED3', 'USE_PRED4', 'USE_PRED5']
         filtered_data = self.df[self.df.DATE >= date].drop(columns=drop_columns)
-        filtered_data['consumption'] = np.expm1(self.data['model'].predict(filtered_data)[:, 2])
+        filtered_data['consumption'] = np.expm1(self.data['model'] \
+            .predict(filtered_data.drop(columns=['fact']))[:, predict_days])
         return filtered_data
