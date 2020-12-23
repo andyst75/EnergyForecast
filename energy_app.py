@@ -57,43 +57,38 @@ data_df = load_data()
 
 df_with_consumption = data_df.get_data_with_consumption(str(predict_from), predict_days=PRED_HORIZON - 1)
 
-#ax = df_with_consumption['consumption'].plot(figsize=(10, 5), label='predict')
-#ax.set(ylabel=f'consumption', xlabel='', title=f'Prediction of the consumption')
-#plt.legend()
-#st.pyplot(plt)
+fig = px.line(df_with_consumption[['fact', 'consumption']],
+              labels={'DATE': 'Период', 'value': 'Среднечасовое потребление, МВт'})
 
-fig = px.line(df_with_consumption[['fact', 'consumption' ]], labels={'DATE':'Период', 'value':'Среднечасовое потребление, МВт'})
-
-fig.update_layout( 
-    xaxis=dict( 
-        rangeselector=dict( 
-            buttons=list([ 
-                dict(count=14, 
-                     step="day", 
-                     stepmode="backward"), 
-                dict(count=30, 
-                     step="day", 
-                     stepmode="backward"), 
-                dict(count=6, 
-                     step="month", 
-                     stepmode="backward"), 
-            ]) 
-        ), 
-        rangeslider=dict( 
+fig.update_layout(
+    xaxis=dict(
+        rangeselector=dict(
+            buttons=list([
+                dict(count=14,
+                     step="day",
+                     stepmode="backward"),
+                dict(count=30,
+                     step="day",
+                     stepmode="backward"),
+                dict(count=6,
+                     step="month",
+                     stepmode="backward"),
+            ])
+        ),
+        rangeslider=dict(
             visible=True
-        ), 
-    ) 
-) 
+        ),
+    )
+)
 
-fig.update_layout(showlegend=False,)
+fig.update_layout(showlegend=False, )
 
 fig.update_layout(
     autosize=False,
     width=800,
-    height=600,)
+    height=600, )
 
 st.plotly_chart(fig, use_container_width=True)
-
 
 with st.beta_expander("See explanation"):
     st.write("""
