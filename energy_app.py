@@ -70,7 +70,7 @@ isolation_index_delta = col1.slider(
 col1.button('Update')
 
 
-@st.cache
+# @st.cache
 def load_data():
     return Energy()
 
