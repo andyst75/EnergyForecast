@@ -23,7 +23,7 @@ electricity consumption depending on changes in external factors.
 ''')
 
 st.markdown("""
-* **Python libraries:** base64, pandas, streamlit, numpy, matplotlib, seaborn, BeautifulSoup, requests, json, time
+* **Python libraries:** scikit-learn, pandas, requests, streamlit, plotly, seaborn, matplotlib, seaborn, numpy
 * **Data source:** [Minenergo](https://minenergo.gov.ru/).
 """)
 DAYS_BACK = 1000
