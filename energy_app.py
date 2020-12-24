@@ -30,6 +30,12 @@ expander_bar.markdown("""
 """)
 
 
+@st.cache
+def load_energy_data():
+    return Energy()
+energy_obj = load_energy_data()
+
+
 col1 = st.sidebar
 col1.image(image=Image.open(f'{Path().absolute()}/resources/made.png'), width=200)
 col1.header('Options')
@@ -63,7 +69,7 @@ isolation_index_delta = col1.slider(
 DAYS_BACK = 1000
 TODAY = datetime.datetime.now().date()
 MIN_DATE = TODAY - datetime.timedelta(days=DAYS_BACK)
-MAX_DATE = datetime.datetime(2020, 7, 1).date()
+MAX_DATE = datetime.date(2020, 7, 1)
 
 random_period = st.sidebar.checkbox('Random period', value=False)
 if random_period:
@@ -85,18 +91,15 @@ period_to = st.sidebar.date_input(
     value=period_to,
     min_value=MIN_DATE,
     max_value=MAX_DATE)
+if period_to < period_from:
+    period_to = period_from
 
 st.sidebar.button('Update')
 
 
-@st.cache
-def load_energy_data():
-    return Energy()
 
 
-data_df = load_energy_data()
-
-df_with_consumption = data_df.get_data_with_consumption(
+df_with_consumption = energy_obj.get_data_with_consumption(
     str(MIN_DATE),
     predict_days=pred_horizon - 1,
     temperature_delta=temperature_delta,
@@ -162,7 +165,7 @@ def filedownload(df):
     b64 = base64.b64encode(csv.encode()).decode()  # strings <-> bytes conversions
     href = f'<a href="data:file/csv;base64,{b64}" download="energy.csv">Download CSV File</a>'
     return href
-st.markdown(filedownload(df_with_consumption.reset_index()), unsafe_allow_html=True)
+# st.markdown(filedownload(df_with_consumption.reset_index()), unsafe_allow_html=True)
 
 st.subheader("Statistic")
 df_consumption = df_with_consumption[['consumption']].reset_index()
@@ -171,3 +174,102 @@ st.dataframe(df_consumption[['consumption']].describe().applymap('{:,.1f}'.forma
 # st.header("Data")
 # df_consumption = df_with_consumption.reset_index()
 # st.dataframe(df_consumption.head(10))
+
+
+predicted_df, metric_df = energy_obj.what_if_predict(
+    period_from,
+    period_to,
+    temperature_delta=temperature_delta,
+    consumption_index_delta=consumption_index_delta,
+    isolation_index_delta=isolation_index_delta
+)
+
+
+cols = ['PRED_1', 'PRED_2', 'PRED_3', 'PRED_4', 'PRED_5']
+PREDICT_COL = 'predict'
+shift_date = pd.DataFrame(
+    predicted_df.loc[pd.to_datetime(period_to), cols].to_numpy(),
+    index=pd.date_range(
+        period_to + pd.DateOffset(1),
+        periods=5, freq='D'
+    ),
+    columns=[PREDICT_COL]
+)
+cols = ['fact', 'PRED_1']
+predicted_df = predicted_df[cols].rename(columns={'PRED_1':PREDICT_COL})
+predicted_df[PREDICT_COL] = predicted_df[PREDICT_COL].shift(1)
+predicted_df = predicted_df.append(shift_date)
+
+
+fig = px.line(predicted_df,
+              labels={'value': 'Average hourly consumption, MW'})
+
+fig.update_layout(
+#     autosize=False,
+#     width=800,
+    height=600,
+#     yaxis_title=
+    xaxis=dict(
+        title='',
+        rangeselector=dict(
+            buttons=list([
+                dict(count=14,
+                     step="day",
+                     stepmode="backward"),
+                dict(count=30,
+                     step="day",
+                     stepmode="backward"),
+                dict(count=6,
+                     step="month",
+                     stepmode="backward"),
+                dict(count=1,
+                     step="year",
+                     stepmode="backward"),
+                dict(step="all"),
+            ])
+        ),
+        rangeslider=dict(
+#             autorange=True,
+            visible=True,
+        ),
+        type="date",
+    ),
+    legend=dict(
+        yanchor="top", y=0.99,
+        xanchor="left", x=0.01,
+        title='',
+    )
+)
+
+st.plotly_chart(fig, use_container_width=True)
+
+st.markdown(filedownload(predicted_df.reset_index()), unsafe_allow_html=True)
+
+# st.dataframe(predicted_df)
+# st.dataframe(shift_date)
+st.dataframe(metric_df.loc[:pred_horizon, ['MAPE']].T)
+
+
+
+st.subheader("What If Prediction")
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
