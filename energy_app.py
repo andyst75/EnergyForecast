@@ -29,48 +29,63 @@ expander_bar.markdown("""
 * **Data source:** [Minenergo](https://minenergo.gov.ru/).
 """)
 
-DAYS_BACK = 1000
-TODAY = datetime.datetime.now().date()
-MIN_DATE = TODAY - datetime.timedelta(days=DAYS_BACK)
-MAX_DATE = datetime.datetime(2020, 7, 1).date()
 
 col1 = st.sidebar
-st.sidebar.image(image=Image.open(f'{Path().absolute()}/resources/made.png'), width=200)
-st.sidebar.header('Options')
+col1.image(image=Image.open(f'{Path().absolute()}/resources/made.png'), width=200)
+col1.header('Options')
 
-pred_horizon = st.sidebar.slider(
-    label="Predict period (days)",
+pred_horizon = col1.slider(
+    label="Predict period, days",
     value=2,
     min_value=1,
     max_value=5)
-temperature_delta = st.sidebar.slider(
-    label="Choose variation of temperature",
+
+col1.subheader("What If Prediction")
+
+temperature_delta = col1.slider(
+    label="Variation of temperature, Δt°C",
     value=0,
     min_value=-10,
     max_value=10)
-consumption_index_delta = st.sidebar.slider(
-    label="Choose variation of consumer activity index",
+consumption_index_delta = col1.slider(
+    label="Variation of consumer activity index, Δt°C",
     value=0,
     min_value=-20,
     max_value=20)
-isolation_index_delta = st.sidebar.slider(
-    label="Choose variation of isolation index",
+isolation_index_delta = col1.slider(
+    label="Variation of isolation index",
     value=0.,
     min_value=-1.,
     max_value=1.,
     step=0.5)
 
-random_date = st.sidebar.checkbox('Random date', value=False)
-if random_date:
+
+DAYS_BACK = 1000
+TODAY = datetime.datetime.now().date()
+MIN_DATE = TODAY - datetime.timedelta(days=DAYS_BACK)
+MAX_DATE = datetime.datetime(2020, 7, 1).date()
+
+random_period = st.sidebar.checkbox('Random period', value=False)
+if random_period:
     delta = int((MAX_DATE - MIN_DATE).days * np.random.random())
-    predict_from = MIN_DATE + datetime.timedelta(days=delta)
+    period_from = MIN_DATE + datetime.timedelta(days=delta)
+    delta = int((MAX_DATE - period_from).days * np.random.random())
+    period_to = period_from + datetime.timedelta(days=delta)
 else:
-    predict_from = MIN_DATE
-predict_from = st.sidebar.date_input(
-    label='Predict from',
-    value=MIN_DATE,
+    period_from = MIN_DATE
+    period_to = MAX_DATE
+
+period_from = st.sidebar.date_input(
+    label='Period from',
+    value=period_from,
     min_value=MIN_DATE,
     max_value=MAX_DATE)
+period_to = st.sidebar.date_input(
+    label='Period to',
+    value=period_to,
+    min_value=MIN_DATE,
+    max_value=MAX_DATE)
+
 st.sidebar.button('Update')
 
 
@@ -82,7 +97,7 @@ def load_energy_data():
 data_df = load_energy_data()
 
 df_with_consumption = data_df.get_data_with_consumption(
-    str(predict_from),
+    str(MIN_DATE),
     predict_days=pred_horizon - 1,
     temperature_delta=temperature_delta,
     consumption_index_delta=consumption_index_delta,
@@ -100,7 +115,7 @@ data_plot = pd.concat([fact_df, consumption_df], axis=1)
 # st.dataframe(data_plot)
 
 fig = px.line(data_plot,
-              labels={'DATE': 'Период', 'value': 'Среднечасовое потребление, МВт'})
+              labels={'value': 'Average hourly consumption, MW'})
 
 fig.update_layout(
 #     autosize=False,
@@ -149,7 +164,7 @@ def filedownload(df):
     return href
 st.markdown(filedownload(df_with_consumption.reset_index()), unsafe_allow_html=True)
 
-st.header("Statistic")
+st.subheader("Statistic")
 df_consumption = df_with_consumption[['consumption']].reset_index()
 st.dataframe(df_consumption[['consumption']].describe().applymap('{:,.1f}'.format).T)
 
