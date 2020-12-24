@@ -36,7 +36,12 @@ class Energy:
         drop_columns = ['DATE', 'USE_PRED1', 'USE_PRED2', 'USE_PRED3', 'USE_PRED4', 'USE_PRED5']
         filtered_data = self.df[self.df.DATE >= date].drop(columns=drop_columns)
         filtered_data['TEMP'] = filtered_data['TEMP'] + temperature_delta
+        filtered_data['TEMP1'] = filtered_data['TEMP1'] + temperature_delta
+        filtered_data['TEMP2'] = filtered_data['TEMP2'] + temperature_delta
+        filtered_data['TEMP3'] = filtered_data['TEMP3'] + temperature_delta
+        filtered_data['TEMP5'] = filtered_data['TEMP5'] + temperature_delta
         filtered_data['COMS'] = filtered_data['COMS'] + consumption_index_delta
+        filtered_data['II'] = filtered_data['II'] + isolation_index_delta
         filtered_data['II3'] = filtered_data['II3'] + isolation_index_delta
         filtered_data['consumption'] = np.expm1(
             self.data['model'].predict(filtered_data.drop(columns=['fact']))[:, predict_days])

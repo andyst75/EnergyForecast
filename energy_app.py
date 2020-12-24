@@ -51,7 +51,7 @@ pred_horizon = st.sidebar.slider(
     label="Predict period (days)",
     value=2,
     min_value=1,
-    max_value=4)
+    max_value=5)
 temperature_delta = st.sidebar.slider(
     label="Choose variation of temperature",
     value=0,
@@ -64,9 +64,10 @@ consumption_index_delta = st.sidebar.slider(
     max_value=20)
 isolation_index_delta = st.sidebar.slider(
     label="Choose variation of isolation index",
-    value=0,
-    min_value=-1,
-    max_value=1)
+    value=0.,
+    min_value=-1.,
+    max_value=1.,
+    step=0.5)
 
 st.sidebar.button('Update')
 
@@ -79,7 +80,7 @@ def load_energy_data():
 data_df = load_energy_data()
 
 df_with_consumption = data_df.get_data_with_consumption(str(predict_from),
-                                                        predict_days=pred_horizon,
+                                                        predict_days=pred_horizon - 1,
                                                         temperature_delta=temperature_delta,
                                                         consumption_index_delta=consumption_index_delta,
                                                         isolation_index_delta=isolation_index_delta)
