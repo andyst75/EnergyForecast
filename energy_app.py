@@ -121,7 +121,7 @@ fig.update_layout(showlegend=False)
 fig.update_layout(
     autosize=False,
     width=800,
-    height=600
+    height=800
 )
 
 st.plotly_chart(fig, use_container_width=True)
