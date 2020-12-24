@@ -25,6 +25,7 @@ electricity consumption depending on changes in external factors.
 
 expander_bar = st.beta_expander("About")
 expander_bar.markdown("""
+* **Team:** Andrei Starikov, Nikolai Diakin, Ilya Avilov, Orkhan Gadzhily, Evgenii Munin
 * **Python libraries:** scikit-learn, pandas, requests, streamlit, plotly, seaborn, matplotlib, seaborn, numpy, base64
 * **Data source:** [Minenergo](https://minenergo.gov.ru/).
 """)
@@ -66,10 +67,11 @@ isolation_index_delta = col1.slider(
     step=0.5)
 
 
-DAYS_BACK = 1000
-TODAY = datetime.datetime.now().date()
-MIN_DATE = TODAY - datetime.timedelta(days=DAYS_BACK)
-MAX_DATE = datetime.date(2020, 7, 1)
+MIN_DATE, MAX_DATE = energy_obj.get_period()
+# DAYS_BACK = 1000
+# TODAY = datetime.datetime.now().date()
+# MIN_DATE = TODAY - datetime.timedelta(days=DAYS_BACK)
+# MAX_DATE = datetime.date(2020, 7, 1)
 
 random_period = st.sidebar.checkbox('Random period', value=False)
 if random_period:
@@ -92,72 +94,72 @@ period_to = st.sidebar.date_input(
     min_value=MIN_DATE,
     max_value=MAX_DATE)
 if period_to < period_from:
-    period_to = period_from
+    period_from = period_to - pd.DateOffset(1)
 
 st.sidebar.button('Update')
 
 
 
 
-df_with_consumption = energy_obj.get_data_with_consumption(
-    str(MIN_DATE),
-    predict_days=pred_horizon - 1,
-    temperature_delta=temperature_delta,
-    consumption_index_delta=consumption_index_delta,
-    isolation_index_delta=isolation_index_delta
-)
+# df_with_consumption = energy_obj.get_data_with_consumption(
+#     str(MIN_DATE),
+#     predict_days=pred_horizon - 1,
+#     temperature_delta=temperature_delta,
+#     consumption_index_delta=consumption_index_delta,
+#     isolation_index_delta=isolation_index_delta
+# )
 
-shift_index_data = pd.date_range(
-    df_with_consumption[['consumption']].index[-1] + pd.DateOffset(1),
-    periods=pred_horizon, freq='D'
-)
-df_with_consumption_with_shift = df_with_consumption.append(pd.DataFrame(index=shift_index_data))
-fact_df = df_with_consumption_with_shift[['fact']]
-consumption_df = df_with_consumption_with_shift[['consumption']].shift(pred_horizon)
-data_plot = pd.concat([fact_df, consumption_df], axis=1)
-# st.dataframe(data_plot)
+# shift_index_data = pd.date_range(
+#     df_with_consumption[['consumption']].index[-1] + pd.DateOffset(1),
+#     periods=pred_horizon, freq='D'
+# )
+# df_with_consumption_with_shift = df_with_consumption.append(pd.DataFrame(index=shift_index_data))
+# fact_df = df_with_consumption_with_shift[['fact']]
+# consumption_df = df_with_consumption_with_shift[['consumption']].shift(pred_horizon)
+# data_plot = pd.concat([fact_df, consumption_df], axis=1)
+# # st.dataframe(data_plot)
 
-fig = px.line(data_plot,
-              labels={'value': 'Average hourly consumption, MW'})
+# fig = px.line(data_plot,
+#               labels={'value': 'Average hourly consumption, MW'})
 
-fig.update_layout(
-#     autosize=False,
-#     width=800,
-    height=600,
-    xaxis=dict(
-        title='',
-        rangeselector=dict(
-            buttons=list([
-                dict(count=14,
-                     step="day",
-                     stepmode="backward"),
-                dict(count=30,
-                     step="day",
-                     stepmode="backward"),
-                dict(count=6,
-                     step="month",
-                     stepmode="backward"),
-                dict(count=1,
-                     step="year",
-                     stepmode="backward"),
-                dict(step="all"),
-            ])
-        ),
-        rangeslider=dict(
-#             autorange=True,
-            visible=True,
-        ),
-        type="date",
-    ),
-    legend=dict(
-        yanchor="top", y=0.99,
-        xanchor="left", x=0.01,
-        title='',
-    )
-)
+# fig.update_layout(
+# #     autosize=False,
+# #     width=800,
+#     height=600,
+#     xaxis=dict(
+#         title='',
+#         rangeselector=dict(
+#             buttons=list([
+#                 dict(count=14,
+#                      step="day",
+#                      stepmode="backward"),
+#                 dict(count=30,
+#                      step="day",
+#                      stepmode="backward"),
+#                 dict(count=6,
+#                      step="month",
+#                      stepmode="backward"),
+#                 dict(count=1,
+#                      step="year",
+#                      stepmode="backward"),
+#                 dict(step="all"),
+#             ])
+#         ),
+#         rangeslider=dict(
+# #             autorange=True,
+#             visible=True,
+#         ),
+#         type="date",
+#     ),
+#     legend=dict(
+#         yanchor="top", y=0.99,
+#         xanchor="left", x=0.01,
+#         title='',
+#     )
+# )
 
-# fig.update_layout(showlegend=False)
-st.plotly_chart(fig, use_container_width=True)
+# # fig.update_layout(showlegend=False)
+# st.plotly_chart(fig, use_container_width=True)
 
 # Download CSV data
 def filedownload(df):
@@ -167,9 +169,9 @@ def filedownload(df):
     return href
 # st.markdown(filedownload(df_with_consumption.reset_index()), unsafe_allow_html=True)
 
-st.subheader("Statistic")
-df_consumption = df_with_consumption[['consumption']].reset_index()
-st.dataframe(df_consumption[['consumption']].describe().applymap('{:,.1f}'.format).T)
+# st.subheader("Statistic")
+# df_consumption = df_with_consumption[['consumption']].reset_index()
+# st.dataframe(df_consumption[['consumption']].describe().applymap('{:,.1f}'.format).T)
 
 # st.header("Data")
 # df_consumption = df_with_consumption.reset_index()
