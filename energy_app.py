@@ -128,7 +128,7 @@ st.plotly_chart(fig, use_container_width=True)
 
 st.header("Statistic")
 df_consumption = df_with_consumption[['consumption']].reset_index()
-st.dataframe(df_consumption[['consumption']].describe().T)
+st.dataframe(df_consumption[['consumption']].describe().applymap('{:,.1f}'.format).T)
 
 st.header("Data")
 df_consumption = df_with_consumption.reset_index()
