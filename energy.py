@@ -56,13 +56,8 @@ class Energy:
         """
         drop_columns = ['DATE', 'fact', 'USE_PRED1', 'USE_PRED2', 'USE_PRED3', 'USE_PRED4', 'USE_PRED5']
         result_columns = ['DATE', 'fact', 'TEMP', 'II', 'COMS', 'MSP', 'PRED_1', 'PRED_2', 'PRED_3', 'PRED_4', 'PRED_5']
-<<<<<<< Updated upstream
         mask = self.df['DATE'].between(pd.to_datetime(date_from), pd.to_datetime(date_to))
         filtered_data = self.df[mask].drop(columns=drop_columns)
-#         filtered_data = self.df[(self.df.DATE >= date_from) & (self.df.DATE <= date_to)].drop(columns=drop_columns)
-=======
-        filtered_data = self.df[(self.df.DATE >= date_from) & (self.df.DATE <= date_to)]
->>>>>>> Stashed changes
         filtered_data['TEMP'] = filtered_data['TEMP'] + temperature_delta
         filtered_data['TEMP1'] = filtered_data['TEMP1'] + temperature_delta
         filtered_data['TEMP2'] = filtered_data['TEMP2'] + temperature_delta
