@@ -22,10 +22,12 @@ Short-term forecast system for electricity consumption ***OES of the Middle Volg
 electricity consumption depending on changes in external factors.
 ''')
 
-st.markdown("""
+expander_bar = st.beta_expander("About")
+expander_bar.markdown("""
 * **Python libraries:** scikit-learn, pandas, requests, streamlit, plotly, seaborn, matplotlib, seaborn, numpy
 * **Data source:** [Minenergo](https://minenergo.gov.ru/).
 """)
+
 DAYS_BACK = 1000
 TODAY = datetime.datetime.now().date()
 MIN_DATE = TODAY - datetime.timedelta(days=DAYS_BACK)
@@ -35,18 +37,6 @@ col1 = st.sidebar
 st.sidebar.image(image=Image.open(f'{Path().absolute()}/resources/made.png'), width=200)
 st.sidebar.header('Options')
 
-random_date = st.sidebar.checkbox('Random date', value=False)
-
-if random_date:
-    delta = int((MAX_DATE - MIN_DATE).days * np.random.random())
-    predict_from = MIN_DATE + datetime.timedelta(days=delta)
-else:
-    predict_from = MIN_DATE
-predict_from = st.sidebar.date_input(
-    label='Predict from',
-    value=MIN_DATE,
-    min_value=MIN_DATE,
-    max_value=MAX_DATE)
 pred_horizon = st.sidebar.slider(
     label="Predict period (days)",
     value=2,
@@ -69,6 +59,17 @@ isolation_index_delta = st.sidebar.slider(
     max_value=1.,
     step=0.5)
 
+random_date = st.sidebar.checkbox('Random date', value=False)
+if random_date:
+    delta = int((MAX_DATE - MIN_DATE).days * np.random.random())
+    predict_from = MIN_DATE + datetime.timedelta(days=delta)
+else:
+    predict_from = MIN_DATE
+predict_from = st.sidebar.date_input(
+    label='Predict from',
+    value=MIN_DATE,
+    min_value=MIN_DATE,
+    max_value=MAX_DATE)
 st.sidebar.button('Update')
 
 
@@ -79,14 +80,18 @@ def load_energy_data():
 
 data_df = load_energy_data()
 
-df_with_consumption = data_df.get_data_with_consumption(str(predict_from),
-                                                        predict_days=pred_horizon - 1,
-                                                        temperature_delta=temperature_delta,
-                                                        consumption_index_delta=consumption_index_delta,
-                                                        isolation_index_delta=isolation_index_delta)
+df_with_consumption = data_df.get_data_with_consumption(
+    str(predict_from),
+    predict_days=pred_horizon - 1,
+    temperature_delta=temperature_delta,
+    consumption_index_delta=consumption_index_delta,
+    isolation_index_delta=isolation_index_delta
+)
 
-shift_index_data = pd.date_range(df_with_consumption[['consumption']].index[-1] + pd.DateOffset(1),
-                                 periods=pred_horizon, freq='D')
+shift_index_data = pd.date_range(
+    df_with_consumption[['consumption']].index[-1] + pd.DateOffset(1),
+    periods=pred_horizon, freq='D'
+)
 df_with_consumption_with_shift = df_with_consumption.append(pd.DataFrame(index=shift_index_data))
 fact_df = df_with_consumption_with_shift[['fact']]
 consumption_df = df_with_consumption_with_shift[['consumption']].shift(pred_horizon)
@@ -108,20 +113,31 @@ fig.update_layout(
                 dict(count=6,
                      step="month",
                      stepmode="backward"),
+                dict(count=1,
+                     step="year",
+                     stepmode="backward"),
+                dict(step="all"),
             ])
         ),
         rangeslider=dict(
-            visible=True
+#             autorange=True,
+            visible=True,
         ),
+        type="date",
+    ),
+    legend=dict(
+        yanchor="top", y=0.99,
+        xanchor="left", x=0.01,
+        title='',
     )
 )
 
-fig.update_layout(showlegend=False)
+# fig.update_layout(showlegend=False)
 
 fig.update_layout(
-    autosize=False,
-    width=800,
-    height=800
+#     autosize=False,
+#     width=800,
+    height=600
 )
 
 st.plotly_chart(fig, use_container_width=True)
