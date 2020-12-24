@@ -4,6 +4,7 @@ from pathlib import Path
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
+import base64
 import plotly.express as px
 import streamlit as st
 from PIL import Image
@@ -24,7 +25,7 @@ electricity consumption depending on changes in external factors.
 
 expander_bar = st.beta_expander("About")
 expander_bar.markdown("""
-* **Python libraries:** scikit-learn, pandas, requests, streamlit, plotly, seaborn, matplotlib, seaborn, numpy
+* **Python libraries:** scikit-learn, pandas, requests, streamlit, plotly, seaborn, matplotlib, seaborn, numpy, base64
 * **Data source:** [Minenergo](https://minenergo.gov.ru/).
 """)
 
@@ -96,12 +97,17 @@ df_with_consumption_with_shift = df_with_consumption.append(pd.DataFrame(index=s
 fact_df = df_with_consumption_with_shift[['fact']]
 consumption_df = df_with_consumption_with_shift[['consumption']].shift(pred_horizon)
 data_plot = pd.concat([fact_df, consumption_df], axis=1)
+# st.dataframe(data_plot)
 
 fig = px.line(data_plot,
               labels={'DATE': 'Период', 'value': 'Среднечасовое потребление, МВт'})
 
 fig.update_layout(
+#     autosize=False,
+#     width=800,
+    height=600,
     xaxis=dict(
+        title='',
         rangeselector=dict(
             buttons=list([
                 dict(count=14,
@@ -133,19 +139,20 @@ fig.update_layout(
 )
 
 # fig.update_layout(showlegend=False)
-
-fig.update_layout(
-#     autosize=False,
-#     width=800,
-    height=600
-)
-
 st.plotly_chart(fig, use_container_width=True)
+
+# Download CSV data
+def filedownload(df):
+    csv = df.to_csv(index=False)
+    b64 = base64.b64encode(csv.encode()).decode()  # strings <-> bytes conversions
+    href = f'<a href="data:file/csv;base64,{b64}" download="energy.csv">Download CSV File</a>'
+    return href
+st.markdown(filedownload(df_with_consumption.reset_index()), unsafe_allow_html=True)
 
 st.header("Statistic")
 df_consumption = df_with_consumption[['consumption']].reset_index()
 st.dataframe(df_consumption[['consumption']].describe().applymap('{:,.1f}'.format).T)
 
-st.header("Data")
-df_consumption = df_with_consumption.reset_index()
-st.dataframe(df_consumption.head(10))
+# st.header("Data")
+# df_consumption = df_with_consumption.reset_index()
+# st.dataframe(df_consumption.head(10))
