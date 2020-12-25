@@ -92,4 +92,4 @@ class Energy:
             r2 = r2_score(consumption, predicted_df[f'PRED_{i}'])
             metric_df.loc[i, METRIC_COLUMNS] =  round(mape, 2), round(mae, 1), round(r2, 3)
 
-        return predicted_df[result_columns].set_index('DATE'), metric_df, original_pred, original_metric
+        return predicted_df[result_columns].set_index('DATE'), metric_df, original_pred, original_metric.set_index('DATE')
