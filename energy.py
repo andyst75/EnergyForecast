@@ -84,6 +84,7 @@ class Energy:
         predicted_array = np.expm1(self.data['model'].predict(filtered_data.drop(columns=drop_columns)))
         predicted_df = pd.DataFrame(predicted_array, columns=['PRED_1', 'PRED_2', 'PRED_3', 'PRED_4', 'PRED_5'])
         predicted_df = pd.concat([filtered_data.reset_index(drop=True), predicted_df], axis=1)
+        metric_df = pd.DataFrame(columns=METRIC_COLUMNS)
 
         for i in range(1, 6):
             consumption = np.expm1(predicted_df[f'USE_PRED{i}'])
@@ -92,4 +93,5 @@ class Energy:
             r2 = r2_score(consumption, predicted_df[f'PRED_{i}'])
             metric_df.loc[i, METRIC_COLUMNS] =  round(mape, 2), round(mae, 1), round(r2, 3)
 
-        return predicted_df[result_columns].set_index('DATE'), metric_df, original_pred, original_metric.set_index('DATE')
+        return predicted_df[result_columns].set_index('DATE'), metric_df, \
+            original_pred.set_index('DATE'), original_metric
