@@ -25,7 +25,7 @@ electricity consumption depending on changes in external factors.
 
 expander_bar = st.beta_expander("About")
 expander_bar.markdown("""
-* **Team:** Andrei Starikov, Nikolai Diakin, Ilya Avilov, Orkhan Gadzhily, Evgenii Munin
+* **Team:** Andrei Starikov, Nikolay Dyakin, Ilya Avilov, Orkhan Gadzhily, Evgenii Munin
 * **Python libraries:** scikit-learn, pandas, requests, streamlit, plotly, seaborn, matplotlib, seaborn, numpy, base64
 * **Data source:** [Minenergo](https://minenergo.gov.ru/).
 """)
