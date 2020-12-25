@@ -7,6 +7,9 @@ import numpy as np
 import pandas as pd
 from sklearn.metrics import mean_absolute_error, r2_score
 
+TEMP_FEATURES = ['TEMP', 'TEMP1', 'TEMP2', 'TEMP3', 'TEMP5']
+METRIC_COLUMNS = ["MAPE", "MAE", "R2"]
+
 class Energy:
 
     def __init__(self, filename='model_data.pkl'):
@@ -35,11 +38,9 @@ class Energy:
         """
         drop_columns = ['DATE', 'USE_PRED1', 'USE_PRED2', 'USE_PRED3', 'USE_PRED4', 'USE_PRED5']
         filtered_data = self.df[self.df.DATE >= date].drop(columns=drop_columns)
-        filtered_data['TEMP'] = filtered_data['TEMP'] + temperature_delta
-        filtered_data['TEMP1'] = filtered_data['TEMP1'] + temperature_delta
-        filtered_data['TEMP2'] = filtered_data['TEMP2'] + temperature_delta
-        filtered_data['TEMP3'] = filtered_data['TEMP3'] + temperature_delta
-        filtered_data['TEMP5'] = filtered_data['TEMP5'] + temperature_delta
+        for feature in TEMP_FEATURES:
+            filtered_data[feature] = filtered_data[feature] + temperature_delta
+        
         filtered_data['COMS'] = filtered_data['COMS'] + consumption_index_delta
         filtered_data['II'] = filtered_data['II'] + isolation_index_delta
         filtered_data['II3'] = filtered_data['II3'] + isolation_index_delta
@@ -63,23 +64,19 @@ class Energy:
         predicted_array = np.expm1(self.data['model'].predict(filtered_data.drop(columns=drop_columns)))
         predicted_df = pd.DataFrame(predicted_array, columns=['PRED_1', 'PRED_2', 'PRED_3', 'PRED_4', 'PRED_5'])
         predicted_df = pd.concat([filtered_data.reset_index(drop=True), predicted_df], axis=1)
-        metric_columns = ["MAPE", "MAE", "R2"]
-        metric_df = pd.DataFrame(columns=metric_columns)
+        metric_df = pd.DataFrame(columns=METRIC_COLUMNS)
 
         for i in range(1, 6):
             consumption = np.expm1(predicted_df[f'USE_PRED{i}'])
             mape = np.mean(np.abs((consumption - predicted_df[f'PRED_{i}']) / predicted_df['fact'])) * 100
             mae = mean_absolute_error(consumption, predicted_df[f'PRED_{i}'])
             r2 = r2_score(consumption, predicted_df[f'PRED_{i}'])
-            metric_df.loc[i, metric_columns] =  round(mape, 2), round(mae, 1), round(r2, 3)
+            metric_df.loc[i, METRIC_COLUMNS] =  round(mape, 2), round(mae, 1), round(r2, 3)
 
         original_pred, original_metric = predicted_df.copy(), metric_df.copy()
 
-        filtered_data['TEMP'] = filtered_data['TEMP'].add(temperature_delta)
-        filtered_data['TEMP1'] = filtered_data['TEMP1'].add(temperature_delta)
-        filtered_data['TEMP2'] = filtered_data['TEMP2'].add(temperature_delta)
-        filtered_data['TEMP3'] = filtered_data['TEMP3'].add(temperature_delta)
-        filtered_data['TEMP5'] = filtered_data['TEMP5'].add(temperature_delta)
+        for feature in TEMP_FEATURES:
+            filtered_data[feature] = filtered_data[feature] + temperature_delta
         filtered_data['COMS'] = filtered_data['COMS'].add(consumption_index_delta)
         filtered_data['II'] = filtered_data['II'].add(isolation_index_delta)
         filtered_data['II3'] = filtered_data['II3'].add(isolation_index_delta)
@@ -87,14 +84,12 @@ class Energy:
         predicted_array = np.expm1(self.data['model'].predict(filtered_data.drop(columns=drop_columns)))
         predicted_df = pd.DataFrame(predicted_array, columns=['PRED_1', 'PRED_2', 'PRED_3', 'PRED_4', 'PRED_5'])
         predicted_df = pd.concat([filtered_data.reset_index(drop=True), predicted_df], axis=1)
-        metric_columns = ["MAPE", "MAE", "R2"]
-        metric_df = pd.DataFrame(columns=metric_columns)
 
         for i in range(1, 6):
             consumption = np.expm1(predicted_df[f'USE_PRED{i}'])
             mape = np.mean(np.abs((consumption - predicted_df[f'PRED_{i}']) / predicted_df['fact'])) * 100
             mae = mean_absolute_error(consumption, predicted_df[f'PRED_{i}'])
             r2 = r2_score(consumption, predicted_df[f'PRED_{i}'])
-            metric_df.loc[i, metric_columns] =  round(mape, 2), round(mae, 1), round(r2, 3)
+            metric_df.loc[i, METRIC_COLUMNS] =  round(mape, 2), round(mae, 1), round(r2, 3)
 
         return predicted_df[result_columns].set_index('DATE'), metric_df, original_pred, original_metric
