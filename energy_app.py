@@ -290,6 +290,10 @@ delta_df = pd.DataFrame({
 )
 delta_df['delta_hour'] = delta_df['with_changes'] - delta_df['base']
 delta_df['delta_day'] = delta_df['delta_hour'] * 24
+delta_df = delta_df.reset_index()
+delta_df['index'] = delta_df['index'].dt.date
+delta_df = delta_df.set_index('index')
+
 st.dataframe(delta_df.applymap('{:,.1f}'.format).T)
 
 total = delta_df['delta_day'].sum()
