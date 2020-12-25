@@ -190,10 +190,10 @@ predicted_df, metric_df, original_predicted_df, original_metric_df = energy_obj.
 cols = ['PRED_1', 'PRED_2', 'PRED_3', 'PRED_4', 'PRED_5']
 PREDICT_COL = 'predict'
 shift_date = pd.DataFrame(
-    predicted_df.loc[pd.to_datetime(period_to), cols].to_numpy(),
+    predicted_df.loc[pd.to_datetime(period_to), cols[:pred_horizon]].to_numpy(),
     index=pd.date_range(
         period_to + pd.DateOffset(1),
-        periods=5, freq='D'
+        periods=pred_horizon, freq='D'
     ),
     columns=[PREDICT_COL]
 )
