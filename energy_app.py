@@ -186,24 +186,47 @@ predicted_df, metric_df, original_predicted_df, original_metric_df = energy_obj.
     isolation_index_delta=isolation_index_delta
 )
 
-
-cols = ['PRED_1', 'PRED_2', 'PRED_3', 'PRED_4', 'PRED_5']
 PREDICT_COL = 'predict'
-shift_date = pd.DataFrame(
-    predicted_df.loc[pd.to_datetime(period_to), cols[:pred_horizon]].to_numpy(),
-    index=pd.date_range(
-        period_to + pd.DateOffset(1),
-        periods=pred_horizon, freq='D'
-    ),
-    columns=[PREDICT_COL]
-)
-cols = ['fact', 'PRED_1']
-predicted_df = predicted_df[cols].rename(columns={'PRED_1':PREDICT_COL})
-predicted_df[PREDICT_COL] = predicted_df[PREDICT_COL].shift(1)
-predicted_df = predicted_df.append(shift_date)
+
+def extract_predict(df):
+    cols = ['PRED_1', 'PRED_2', 'PRED_3', 'PRED_4', 'PRED_5']
+    shift_date = pd.DataFrame(
+        df.loc[pd.to_datetime(period_to), cols[:pred_horizon]].to_numpy(),
+        index=pd.date_range(
+            period_to + pd.DateOffset(1),
+            periods=pred_horizon, freq='D'
+        ),
+        columns=[PREDICT_COL]
+    )
+    return shift_date
+    
+def build_full_predict(df):
+    cols = ['fact', 'PRED_1']
+    predicted_df = df[cols].rename(columns={'PRED_1':PREDICT_COL})
+    predicted_df[PREDICT_COL] = predicted_df[PREDICT_COL].shift(1)
+    shift_date = extract_predict(df)
+    predicted_df = predicted_df.append(shift_date)
+    return predicted_df
+
+# cols = ['PRED_1', 'PRED_2', 'PRED_3', 'PRED_4', 'PRED_5']
+# PREDICT_COL = 'predict'
+# shift_date = pd.DataFrame(
+#     predicted_df.loc[pd.to_datetime(period_to), cols[:pred_horizon]].to_numpy(),
+#     index=pd.date_range(
+#         period_to + pd.DateOffset(1),
+#         periods=pred_horizon, freq='D'
+#     ),
+#     columns=[PREDICT_COL]
+# )
+# cols = ['fact', 'PRED_1']
+# predicted_df = predicted_df[cols].rename(columns={'PRED_1':PREDICT_COL})
+# predicted_df[PREDICT_COL] = predicted_df[PREDICT_COL].shift(1)
+# predicted_df = predicted_df.append(shift_date)
+
+plot_df = build_full_predict(predicted_df)
 
 
-fig = px.line(predicted_df,
+fig = px.line(plot_df,
               labels={'value': 'Average hourly consumption, MW'})
 
 fig.update_layout(
@@ -245,7 +268,7 @@ fig.update_layout(
 
 st.plotly_chart(fig, use_container_width=True)
 
-st.markdown(filedownload(predicted_df.reset_index()), unsafe_allow_html=True)
+st.markdown(filedownload(plot_df.reset_index()), unsafe_allow_html=True)
 
 # st.dataframe(predicted_df)
 # st.dataframe(shift_date)
@@ -256,11 +279,21 @@ st.dataframe(metric_df.loc[:pred_horizon, ['MAPE']].T)
 st.subheader("What If Prediction")
 
 
+# st.dataframe(extract_predict(predicted_df))
+# st.dataframe(extract_predict(original_predicted_df))
 
+# col = 'Pre'
+delta_df = pd.DataFrame({
+        'base': extract_predict(original_predicted_df)[PREDICT_COL],
+        'with_changes': extract_predict(predicted_df)[PREDICT_COL],
+    },
+)
+delta_df['delta_hour'] = delta_df['with_changes'] - delta_df['base']
+delta_df['delta_day'] = delta_df['delta_hour'] * 24
+st.dataframe(delta_df.applymap('{:,.1f}'.format).T)
 
-
-
-
+total = delta_df['delta_day'].sum()
+st.markdown(f'Total delta consumption for scenario, MW: **{total:,.1f}**')
 
 
 
