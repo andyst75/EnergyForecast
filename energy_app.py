@@ -178,7 +178,7 @@ def filedownload(df):
 # st.dataframe(df_consumption.head(10))
 
 
-predicted_df, metric_df = energy_obj.what_if_predict(
+predicted_df, metric_df, original_predicted_df, original_metric_df = energy_obj.what_if_predict(
     period_from,
     period_to,
     temperature_delta=temperature_delta,
