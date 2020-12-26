@@ -75,3 +75,5 @@ class Energy:
         what_if_pred, what_if_metric = calc_metric(predicted_df)
 
         return what_if_pred.set_index('DATE'), what_if_metric, original_pred.set_index('DATE'), original_metric
+
+      
