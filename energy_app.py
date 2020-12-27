@@ -68,6 +68,7 @@ isolation_index_delta = col1.slider(
     step=0.5)
 
 MIN_DATE, MAX_DATE = energy_obj.get_period()
+START_DATE = datetime.date(2019, 10, 1)
 random_period = st.sidebar.checkbox('Random period', value=False)
 if random_period:
     delta = int((MAX_DATE - MIN_DATE).days * np.random.random())
@@ -75,7 +76,7 @@ if random_period:
     delta = int((MAX_DATE - period_from).days * np.random.random())
     period_to = period_from + datetime.timedelta(days=delta)
 else:
-    period_from = MIN_DATE
+    period_from = START_DATE
     period_to = MAX_DATE
 
 period_from = st.sidebar.date_input(
