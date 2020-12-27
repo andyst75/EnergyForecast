@@ -43,7 +43,7 @@ col1.image(image=Image.open(f'{Path().absolute()}/resources/made.png'), width=20
 col1.header('Options')
 
 pred_horizon = col1.slider(
-    label="Predict period, days",
+    label="Prediction horizon, days",
     value=2,
     min_value=1,
     max_value=5)
@@ -71,6 +71,7 @@ col1.markdown('Click a random period or set it manually.')
 
 MIN_DATE, MAX_DATE = energy_obj.get_period()
 START_DATE = datetime.date(2019, 10, 1)
+
 random_period = col1.checkbox('Random period', value=False)
 if random_period:
     delta = int((MAX_DATE - MIN_DATE).days * np.random.random())
@@ -175,6 +176,8 @@ fig.update_layout(
 
 st.plotly_chart(fig, use_container_width=True)
 st.markdown(filedownload(plot_df.reset_index()), unsafe_allow_html=True)
+
+st.markdown('Evaluating the quality of a model based on historical data.')
 st.dataframe(metric_df.loc[:pred_horizon, ['MAPE']].T)
 
 
