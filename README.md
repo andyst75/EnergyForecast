@@ -55,5 +55,6 @@
 - Индекс активности потребления
 - Индекс изоляции
 
-Доступный период прогнозирования - от 1 до 5 дней.
+Доступный период прогнозирования - от 1 до 5 дней.  
+
 ![dashboard](https://github.com/andyst75/EnergyForecast/blob/main/resources/demo_screen.png)
