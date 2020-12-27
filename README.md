@@ -51,3 +51,4 @@
 - Индекс изоляции
 
 Доступный период прогнозирования - от 1 до 5 дней.
+![dashboard](https://github.com/EvgeniiMunin/made-ml-hw4/blob/main/resources/demo_screen.png)
