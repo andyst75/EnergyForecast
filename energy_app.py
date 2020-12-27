@@ -179,7 +179,7 @@ st.plotly_chart(fig, use_container_width=True)
 st.markdown(filedownload(plot_df.reset_index()), unsafe_allow_html=True)
 
 st.markdown('Evaluating the quality of a model based on historical data.')
-st.dataframe(metric_df.loc[:pred_horizon, ['MAPE']].T)
+st.dataframe(metric_df.loc[:pred_horizon, ['MAE', 'MAPE']].T)
 
 
 st.subheader("What If Prediction")
