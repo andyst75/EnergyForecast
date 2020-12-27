@@ -67,9 +67,11 @@ isolation_index_delta = col1.slider(
     max_value=1.,
     step=0.5)
 
+col1.markdown('Click a random period or set it manually.')
+
 MIN_DATE, MAX_DATE = energy_obj.get_period()
 START_DATE = datetime.date(2019, 10, 1)
-random_period = st.sidebar.checkbox('Random period', value=False)
+random_period = col1.checkbox('Random period', value=False)
 if random_period:
     delta = int((MAX_DATE - MIN_DATE).days * np.random.random())
     period_from = MIN_DATE + datetime.timedelta(days=delta)
@@ -79,12 +81,12 @@ else:
     period_from = START_DATE
     period_to = MAX_DATE
 
-period_from = st.sidebar.date_input(
+period_from = col1.date_input(
     label='Period from',
     value=period_from,
     min_value=MIN_DATE,
     max_value=MAX_DATE)
-period_to = st.sidebar.date_input(
+period_to = col1.date_input(
     label='Period to',
     value=period_to,
     min_value=MIN_DATE,
@@ -93,7 +95,7 @@ period_to = st.sidebar.date_input(
 if period_to < period_from:
     period_from = period_to - pd.DateOffset(1)
 
-st.sidebar.button('Update')
+col1.button('Update')
 
 
 # Download CSV data
@@ -174,7 +176,13 @@ fig.update_layout(
 st.plotly_chart(fig, use_container_width=True)
 st.markdown(filedownload(plot_df.reset_index()), unsafe_allow_html=True)
 st.dataframe(metric_df.loc[:pred_horizon, ['MAPE']].T)
+
+
 st.subheader("What If Prediction")
+st.markdown('''
+    The table shows the forecast of electricity consumption on the planning 
+    horizon without changes and with the specified scenario changes in MW.
+''')
 
 delta_df = pd.DataFrame({
     'base': extract_predict(original_predicted_df)[PREDICT_COL],
@@ -186,6 +194,8 @@ delta_df['delta_day'] = delta_df['delta_hour'] * 24
 delta_df = delta_df.reset_index()
 delta_df['index'] = delta_df['index'].dt.date
 delta_df = delta_df.set_index('index')
+
+
 
 st.dataframe(delta_df.applymap('{:,.1f}'.format).T)
 
